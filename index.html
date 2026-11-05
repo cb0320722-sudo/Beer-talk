@@ -89,6 +89,10 @@ h2.sec{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.08em;ma
 .c-q{background:var(--gold-soft);color:var(--gold)} .c-y,.c-far{background:var(--gray-soft);color:var(--muted)} .c-none{background:var(--gray-soft);color:var(--muted)}
 .c-promo{background:var(--amber-soft);color:var(--amber)}
 .c-ok{background:var(--ok-soft);color:var(--ok)}
+.c-out{background:transparent;color:var(--muted);border:1px solid var(--line)}
+.item.dim{opacity:.62;box-shadow:none}
+.item .note{grid-column:1/-1;font-size:12px;color:var(--muted);margin-top:2px}
+.item b.num{font-size:15px;color:var(--ink)}
 .empty{text-align:center;color:var(--muted);padding:36px 12px;font-size:14px;line-height:1.7}
 
 /* filters */
@@ -110,8 +114,17 @@ h2.sec{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.08em;ma
 .checkrow{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 13px;box-shadow:var(--shadow)}
 .checkrow .nm{font-weight:800;font-size:15.5px;margin-bottom:8px;display:flex;gap:8px;align-items:center}
 .checkrow .nm input{flex:1;font-weight:800;border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:10px 11px;min-height:44px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px}
-@media (max-width:380px){.grid2{grid-template-columns:1fr}}
+.checkrow.compact{padding:9px 13px;box-shadow:none;background:transparent}
+.checkrow.compact .nm{margin:0;font-size:14.5px;color:var(--muted);font-weight:700}
+.checkrow .seg{margin-bottom:8px}
+.mini{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 11px;font-size:12.5px;font-weight:800;cursor:pointer;color:var(--amber);white-space:nowrap;flex-shrink:0}
+.ml-auto.mini{margin-left:auto}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px 10px}
+.grid2>.f{min-width:0}
+.f input[type=date]{min-width:0;max-width:100%;display:block;-webkit-appearance:none;appearance:none}
+.f input[type=date]::-webkit-date-and-time-value{text-align:left}
+.stepper input{width:100%}
+@media (max-width:360px){.grid2{grid-template-columns:minmax(0,1fr)}}
 .f label{display:block;font-size:12px;font-weight:800;color:var(--muted);margin:0 0 4px}
 .f input,.f select,.f textarea{width:100%;border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:10px 11px;min-height:44px}
 .f textarea{min-height:64px;resize:vertical}
@@ -181,13 +194,15 @@ h2.sec{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.08em;ma
   <main class="wrap">
     <!-- 總覽 -->
     <section data-tab="home">
+      <div class="banner warn" id="schemaWarn" hidden style="margin-bottom:12px"></div>
+      <h2 class="sec" style="margin-top:2px">瓶裝</h2>
       <div class="stats">
         <button class="stat red" data-goto="now"><div class="n" id="stNow">0</div><div class="l">促銷中</div></button>
         <button class="stat orange" data-goto="soon"><div class="n" id="stSoon">0</div><div class="l">30天內開始</div></button>
         <button class="stat gold" data-goto="q"><div class="n" id="stQ">0</div><div class="l">3個月內開始</div></button>
         <button class="stat gray" data-goto="none"><div class="n" id="stNone">0</div><div class="l">效期未填</div></button>
       </div>
-      <h2 class="sec">桶裝盤點</h2>
+      <h2 class="sec">桶裝</h2>
       <div class="panel kegsum">
         <div><div class="t" id="kegLast">—</div><div class="s" id="kegNear">—</div></div>
         <button class="btn primary ml-auto" id="homeCheckBtn">開始本週盤點</button>
@@ -211,12 +226,15 @@ h2.sec{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.08em;ma
     <section data-tab="keg" hidden>
       <div class="banner" id="kegBanner"></div>
       <div id="kegNormal">
-        <h2 class="sec">目前桶裝</h2>
+        <input class="search" id="kq" type="search" placeholder="搜尋桶裝品名" aria-label="搜尋桶裝品名" style="margin-top:12px">
+        <div class="chips" id="kfSrc"></div>
+        <div class="chips" id="kfSt"></div>
+        <div class="count" id="kCount"></div>
         <div class="list" id="kList"></div>
       </div>
       <div id="kegCheck" hidden>
         <h2 class="sec" id="checkTitle">本週盤點</h2>
-        <p class="hint" style="margin:-2px 2px 10px">確認每一桶的效期、剩餘桶數、開桶日和活動，最後按「送出盤點」。</p>
+        <p class="hint" style="margin:-2px 2px 10px">照紙本順序，確認每一項的效期、開桶剩餘、庫存和活動，最後按「送出盤點」。灰色的是目前沒貨的，有進貨再點「有貨了」填寫。</p>
         <div class="list" id="checkList"></div>
         <div style="margin-top:10px"><button class="btn ghost" id="checkAdd">＋ 再加一桶</button></div>
       </div>
@@ -266,12 +284,20 @@ h2.sec{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.08em;ma
 <div class="scrim" id="kModal" hidden>
   <form class="sheet" id="kForm" autocomplete="off">
     <h3 id="kTitle">編輯桶裝</h3>
-    <div class="f"><label for="kName">品名</label><input id="kName" required placeholder="例：台啤 18 天生啤 20L"></div>
+    <div class="f"><label for="kName">品名</label><input id="kName" required placeholder="例：康尼森小麥白啤酒 20L"></div>
+    <div class="f"><label>來源</label><div class="seg" id="kSrc"><button type="button" data-v="璞麗">璞麗</button><button type="button" data-v="國內自購">國內自購</button></div></div>
     <div class="grid2">
       <div class="f"><label for="kExp">效期</label><input id="kExp" type="date"></div>
-      <div class="f"><label>剩餘桶數</label><div class="stepper"><button type="button" data-step="-1" aria-label="減一">−</button><input id="kQty" inputmode="numeric"><button type="button" data-step="1" aria-label="加一">＋</button></div></div>
+      <div class="f"><label for="kExp2">另一批效期（選填）</label><input id="kExp2" type="date"></div>
     </div>
-    <div class="f"><label for="kOpened">開桶（上線）日期</label><input id="kOpened" type="date">
+    <div class="hint" style="margin:-6px 0 10px">只標年月的，選那個月的最後一天。有兩批時，系統用比較早的那批算促銷。</div>
+    <div class="preview" id="kPreview"></div>
+    <div class="grid2">
+      <div class="f"><label for="kLeft">開桶剩餘（0～1）</label><div class="stepper"><button type="button" data-kstep="kLeft:-0.1" aria-label="減 0.1">−</button><input id="kLeft" inputmode="decimal"><button type="button" data-kstep="kLeft:0.1" aria-label="加 0.1">＋</button></div><div class="hint">0.5＝剩一半，0＝空了</div></div>
+      <div class="f"><label for="kS1" id="kS1L">店內庫存（整桶）</label><div class="stepper"><button type="button" data-kstep="kS1:-1" aria-label="減一">−</button><input id="kS1" inputmode="numeric"><button type="button" data-kstep="kS1:1" aria-label="加一">＋</button></div></div>
+      <div class="f" id="kS2F"><label for="kS2">台南庫存（整桶）</label><div class="stepper"><button type="button" data-kstep="kS2:-1" aria-label="減一">−</button><input id="kS2" inputmode="numeric"><button type="button" data-kstep="kS2:1" aria-label="加一">＋</button></div></div>
+    </div>
+    <div class="f"><label for="kOpened">開桶（上線）日期（選填）</label><input id="kOpened" type="date">
       <div class="quick"><button type="button" id="kOpenToday">今天開桶</button><button type="button" class="clr" id="kOpenClear">清除</button></div></div>
     <div class="f"><label for="kPromo">目前活動</label><input id="kPromo" placeholder="例：買3送1">
       <div class="quick" data-for="kPromo"><button type="button">買2送1</button><button type="button">買3送1</button><button type="button">第二杯半價</button><button type="button" class="clr" data-clear="1">清除</button></div></div>
@@ -290,7 +316,7 @@ h2.sec{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.08em;ma
 <script>
 (function(){
 'use strict';
-var APP_VERSION='2026-11-05-01';
+var APP_VERSION='2026-11-05-02';
 var API='https://script.google.com/macros/s/AKfycbwC80CLvfnPaI5JLmgIRXcze9PxjTfqIW0oWlqIr_416YDZrpkEHluX9vrZvUH4GKNs/exec';            // ← 部署 Apps Script 後填入 /exec 網址
 var PIN_KEY='stockPin', CACHE_KEY='stockCache';
 
@@ -310,19 +336,40 @@ function isDate(s){return /^\d{4}-\d{2}-\d{2}$/.test(String(s||''));}
 function rel(d){ if(d===0)return '今天'; return d>0? d+' 天後' : '已過 '+(-d)+' 天'; }
 
 /* ---------- 狀態 ---------- */
-var D={bottles:[],kegs:[],config:{lead:3,kegCycle:7,sheetUrl:''}};
-var ST={exp:{t:'已過期',o:0},now:{t:'促銷中',o:1},soon:{t:'30天內開始',o:2},q:{t:'3個月內開始',o:3},y:{t:'一年內開始',o:4},far:{t:'尚早',o:5},none:{t:'效期未填',o:6}};
+var D={bottles:[],kegs:[],config:{lead:3,kegCycle:7,sheetUrl:''},schema:0};
+var ST={exp:{t:'已過期',o:0},now:{t:'促銷中',o:1},soon:{t:'30天內開始',o:2},q:{t:'3個月內開始',o:3},y:{t:'一年內開始',o:4},far:{t:'尚早',o:5},none:{t:'效期未填',o:6},out:{t:'無庫存',o:7}};
 function bInfo(b){
   if(!isDate(b.exp)) return {k:'none'};
   var t=todayStr(), dE=diff(t,b.exp), ps=addMonths(b.exp,-D.config.lead), dP=diff(t,ps), k;
   if(dE<0)k='exp'; else if(dP<=0)k='now'; else if(dP<=30)k='soon'; else if(dP<=90)k='q'; else if(dP<=365)k='y'; else k='far';
   return {k:k,dE:dE,ps:ps,dP:dP};
 }
+/* 桶裝：跟瓶裝一樣用「到期前 N 個月開始促銷」；有兩批時用早的那批；開桶＋庫存都是 0 → 無庫存 */
+function kNum(v){var n=parseFloat(v);return isNaN(n)?0:n;}
+function kOut(k){return kNum(k.left)+kNum(k.s1)+kNum(k.s2)===0;}
+function kExpEff(k){var a=isDate(k.exp)?k.exp:'',b=isDate(k.exp2)?k.exp2:'';return a&&b?(a<b?a:b):(a||b);}
 function kInfo(k){
-  var t=todayStr(), o={};
-  if(isDate(k.exp)){o.dE=diff(t,k.exp); o.k=o.dE<0?'exp':o.dE<=14?'now':o.dE<=30?'soon':'ok';}
-  if(isDate(k.opened)) o.dOpen=diff(k.opened,t);
+  var e=kExpEff(k), o;
+  if(kOut(k)) o={k:'out'};
+  else if(!e) o={k:'none'};
+  else o=bInfo({exp:e});
+  o.e=e; if(e&&o.dE==null) o.dE=diff(todayStr(),e);
+  if(isDate(k.opened)) o.dOpen=diff(k.opened,todayStr());
   return o;
+}
+function normKegs(arr){
+  return (arr||[]).map(function(k){
+    var o=Object.assign({src:'',exp2:'',left:'',s1:'',s2:'',opened:'',checked:'',promo:'',note:''},k);
+    if(k.s1===undefined&&k.qty!==undefined) o.s1=k.qty; // 舊版後端
+    return o;
+  });
+}
+function kStock(k){
+  var p=[], b=function(v){return '<b class="num">'+esc(v)+'</b>';};
+  if(k.left!=='') p.push('開桶 '+b(k.left));
+  if(k.src==='國內自購'){ if(k.s1!=='') p.push('庫存 '+b(k.s1)); }
+  else { if(k.s1!=='') p.push('店內 '+b(k.s1)); if(k.s2!=='') p.push('台南 '+b(k.s2)); }
+  return p.join('・');
 }
 function lastCheck(){var l='';D.kegs.forEach(function(k){if(isDate(k.checked)&&k.checked>l)l=k.checked;});return l;}
 function stockLabels(src){return src==='國內自購'?['架上','冰箱']:['店內','台南'];}
@@ -341,8 +388,8 @@ function apiPost(action,data){
 }
 function stamp(){var d=new Date();return pad(d.getHours())+':'+pad(d.getMinutes());}
 function apply(j){
-  D.bottles=j.bottles||[]; D.kegs=j.kegs||[]; D.config=j.config||D.config;
-  store(CACHE_KEY,JSON.stringify({bottles:D.bottles,kegs:D.kegs,config:D.config,at:Date.now()}));
+  D.bottles=j.bottles||[]; D.kegs=normKegs(j.kegs); D.config=j.config||D.config; D.schema=j.schema||1;
+  store(CACHE_KEY,JSON.stringify({bottles:D.bottles,kegs:D.kegs,config:D.config,schema:D.schema,at:Date.now()}));
   setSync('','已同步 '+stamp());
   renderAll();
 }
@@ -390,21 +437,23 @@ function renderHome(){
   var todo=[];
   D.bottles.forEach(function(b){var i=bInfo(b); if(c[i.k]!=null)c[i.k]++; if(i.k==='exp'||i.k==='now'||i.k==='soon')todo.push({type:'b',o:b,i:i});});
   $('#stNow').textContent=c.now+c.exp; $('#stSoon').textContent=c.soon; $('#stQ').textContent=c.q; $('#stNone').textContent=c.none;
-  var near=0;
-  D.kegs.forEach(function(k){var i=kInfo(k); if(i.dE!=null&&i.dE<=30){near++;todo.push({type:'k',o:k,i:i});}});
+  var kc={inn:0,now:0,soon:0};
+  D.kegs.forEach(function(k){var i=kInfo(k); if(i.k!=='out')kc.inn++; if(i.k==='exp'||i.k==='now')kc.now++; if(i.k==='soon')kc.soon++; if(i.k==='exp'||i.k==='now'||i.k==='soon')todo.push({type:'k',o:k,i:i});});
   var lc=lastCheck(), cyc=D.config.kegCycle||7;
   if(!D.kegs.length){ $('#kegLast').textContent='還沒有桶裝資料'; }
   else if(!lc){ $('#kegLast').innerHTML='<span class="warn">還沒有盤點紀錄</span>'; }
   else { var ds=diff(lc,todayStr()); $('#kegLast').innerHTML='上次盤點 '+esc(lc)+'（'+(ds===0?'今天':ds+' 天前')+'）'+(ds>cyc?'　<span class="warn">該盤點了</span>':''); }
-  $('#kegNear').textContent = D.kegs.length ? ('共 '+D.kegs.length+' 項・30 天內到期 '+near+' 項') : '到「桶裝」新增第一桶';
+  $('#kegNear').textContent = D.kegs.length ? ('有庫存 '+kc.inn+' 項・促銷中 '+kc.now+'・30天內開始 '+kc.soon) : '到「桶裝」新增第一桶';
   todo.sort(function(a,b){return sortKey(a)-sortKey(b);});
   $('#todo').innerHTML = todo.length ? todo.map(function(x){return x.type==='b'?bCard(x.o,x.i):kCard(x.o,x.i);}).join('') :
-    '<div class="empty">目前沒有要立刻處理的品項 👍<br>30 天內要開始促銷的瓶裝、30 天內到期的桶裝會出現在這裡。</div>';
+    '<div class="empty">目前沒有要立刻處理的品項 👍<br>已到促銷期、30 天內要開始促銷的瓶裝和桶裝會出現在這裡。</div>';
+  var sw=$('#schemaWarn'); sw.hidden=!(D.schema===1);
+  sw.textContent='⚠ 試算表後端還是舊版：桶裝的來源、開桶剩餘、台南庫存等新欄位存不進去。請店長更新 Apps Script（部署新版本）。';
   $('#foot').innerHTML = (D.config.sheetUrl?'<a href="'+esc(D.config.sheetUrl)+'" target="_blank" rel="noopener">店長：開啟 Google 試算表</a><br>':'')+
     '促銷開始日＝到期前 '+(D.config.lead||3)+' 個月<br><button id="logoutBtn" type="button">登出（換密碼）</button>';
   $('#logoutBtn').onclick=function(){logout('');};
 }
-function sortKey(x){ if(x.type==='b') return dnum(x.o.exp); return isDate(x.o.exp)?dnum(x.o.exp):9e9; }
+function sortKey(x){ if(x.type==='b') return dnum(x.o.exp); return x.i&&x.i.e?dnum(x.i.e):9e9; }
 $$('[data-goto]').forEach(function(b){b.addEventListener('click',function(){F.st=b.getAttribute('data-goto');F.src='';F.cat='';renderBottles();setTab('bottle');});});
 
 /* ---------- 瓶裝 ---------- */
@@ -452,63 +501,104 @@ $('#q').addEventListener('input',function(){F.q=this.value;renderBottles();});
 /* ---------- 桶裝 ---------- */
 function kCard(k,i){
   i=i||kInfo(k);
-  var right = isDate(k.exp)? '<div class="date num">'+esc(k.exp)+'</div><div class="sub">'+(i.dE<0?'已過期':'剩 '+i.dE+' 天')+'</div>' : '<div class="date num" style="color:var(--muted)">—</div><div class="sub">未填效期</div>';
-  var chip = i.k==='exp'?'<span class="chip c-exp">已過期</span>':i.k==='now'?'<span class="chip c-now">14天內到期</span>':i.k==='soon'?'<span class="chip c-soon">30天內到期</span>':'';
-  var line3=[]; if(chip)line3.push(chip);
-  line3.push('剩 <b class="num" style="font-size:15px;color:var(--ink)">'+(k.qty===''?'—':esc(k.qty))+'</b> 桶');
-  if(isDate(k.opened)) line3.push('開桶 '+esc(k.opened)+'（第 '+(i.dOpen+1)+' 天）');
+  var right = i.e? '<div class="date num">'+esc(i.e)+'</div><div class="sub">'+(i.dE<0?'已過期':'剩 '+i.dE+' 天')+'</div>' : '<div class="date num" style="color:var(--muted)">—</div><div class="sub">'+(i.k==='out'?'':'未填效期')+'</div>';
+  var line3=['<span class="chip c-'+i.k+'">'+ST[i.k].t+'</span>'];
+  if(i.ps&&i.k!=='exp') line3.push('促銷開始 <span class="num">'+esc(i.ps)+'</span>（'+(i.dP<=0?'已開始':rel(i.dP))+'）');
   if(k.promo) line3.push('<span class="chip c-promo">🏷 '+esc(k.promo)+'</span>');
-  return '<button class="item" data-k="'+esc(k.id)+'"><div class="nm">🛢 '+esc(k.name)+'</div>'+right+
-    '<div class="meta">'+(isDate(k.checked)?'上次盤點 '+esc(k.checked):'尚未盤點')+'</div><div class="line3">'+line3.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div></button>';
+  var st=kStock(k); if(st) line3.push(st);
+  if(isDate(k.exp)&&isDate(k.exp2)) line3.push('另一批 <span class="num">'+esc(i.e===k.exp?k.exp2:k.exp)+'</span>');
+  if(isDate(k.opened)) line3.push('開桶日 '+esc(k.opened)+'（第 '+(i.dOpen+1)+' 天）');
+  return '<button class="item'+(i.k==='out'?' dim':'')+'" data-k="'+esc(k.id)+'"><div class="nm">🛢 '+esc(k.name)+'</div>'+right+
+    '<div class="meta">'+(k.src?esc(k.src)+'・':'')+(isDate(k.checked)?'盤點 '+esc(k.checked):'尚未盤點')+'</div><div class="line3">'+line3.map(function(x){return '<span>'+x+'</span>';}).join('')+'</div>'+
+    (k.note?'<div class="note">📝 '+esc(k.note)+'</div>':'')+'</button>';
 }
+var KF={src:'',st:'',q:''};
+var KST=[['','全部'],['todo','要處理'],['in','有庫存'],['out','無庫存']];
 function renderKegs(){
   var lc=lastCheck(), cyc=D.config.kegCycle||7, bn=$('#kegBanner');
   if(!lc){bn.className='banner none';bn.innerHTML='還沒有盤點紀錄'+(D.kegs.length?'<button class="btn primary ml-auto" data-startcheck="1">開始盤點</button>':'');}
   else{var ds=diff(lc,todayStr());
     if(ds>cyc){bn.className='banner warn';bn.innerHTML='已經 '+ds+' 天沒盤點了（上次 '+esc(lc)+'）<button class="btn primary ml-auto" data-startcheck="1">開始盤點</button>';}
     else{bn.className='banner ok';bn.innerHTML='✓ 上次盤點 '+esc(lc)+'（'+(ds===0?'今天':ds+' 天前')+'）<button class="btn ghost ml-auto" data-startcheck="1">再盤點一次</button>';}}
-  var ks=D.kegs.slice().sort(function(a,b){return (isDate(a.exp)?dnum(a.exp):9e9)-(isDate(b.exp)?dnum(b.exp):9e9);});
-  $('#kList').innerHTML=ks.length?ks.map(function(k){return kCard(k);}).join(''):'<div class="empty">還沒有桶裝品項<br>按右下「＋ 新增桶裝」加入第一桶，之後每週用「開始盤點」更新。</div>';
+  chipRow($('#kfSrc'),'來源',[['','全部'],['璞麗','璞麗'],['國內自購','國內自購']],KF.src,'src');
+  chipRow($('#kfSt'),'狀態',KST,KF.st,'st');
+  var q=KF.q.trim().toLowerCase();
+  var rows=D.kegs.map(function(k,ix){return {k:k,i:kInfo(k),ix:ix};}).filter(function(x){
+    if(KF.src&&x.k.src!==KF.src)return false;
+    if(KF.st==='todo'&&['exp','now','soon','q'].indexOf(x.i.k)<0)return false;
+    if(KF.st==='in'&&x.i.k==='out')return false;
+    if(KF.st==='out'&&x.i.k!=='out')return false;
+    if(q&&String(x.k.name).toLowerCase().indexOf(q)<0)return false;
+    return true;
+  }).sort(function(a,b){
+    var A=(a.i.k==='out'?2e9:0)+(a.i.e?dnum(a.i.e):1e9), B=(b.i.k==='out'?2e9:0)+(b.i.e?dnum(b.i.e):1e9);
+    return A-B||a.ix-b.ix;
+  });
+  var nOut=rows.filter(function(x){return x.i.k==='out';}).length;
+  $('#kCount').textContent='共 '+rows.length+' 項（依效期排序'+(nOut&&nOut<rows.length?'，無庫存的排最後':'')+'）';
+  $('#kList').innerHTML=D.kegs.length?(rows.length?rows.map(function(x){return kCard(x.k,x.i);}).join(''):'<div class="empty">沒有符合的品項</div>'):'<div class="empty">還沒有桶裝品項<br>按右下「＋ 新增桶裝」加入第一桶，之後每週用「開始盤點」更新。</div>';
 }
+$('#kq').addEventListener('input',function(){KF.q=this.value;renderKegs();});
+['#kfSrc','#kfSt'].forEach(function(s){$(s).addEventListener('click',function(e){var b=e.target.closest('[data-k]');if(!b)return;KF[b.getAttribute('data-k')]=b.getAttribute('data-v');renderKegs();});});
 document.addEventListener('click',function(e){ if(e.target.closest('[data-startcheck]')) startCheck(); });
 $('#homeCheckBtn').addEventListener('click',function(){setTab('keg');startCheck();});
 
 /* ---------- 每週盤點模式 ---------- */
 var CHECK=false, CROWS=[];
+var CFIELDS=['id','src','name','exp','exp2','left','s1','s2','opened','promo','note'];
+function blankCheckRow(){return {id:'',src:KF.src||'璞麗',name:'',exp:'',exp2:'',left:'',s1:'',s2:'',opened:'',promo:'',note:'',_c:false};}
 function startCheck(){
   CHECK=true;
-  CROWS=D.kegs.slice().sort(function(a,b){return String(a.name).localeCompare(b.name);}).map(function(k){return {id:k.id,name:k.name,exp:k.exp,qty:k.qty,opened:k.opened,promo:k.promo,note:k.note};});
-  if(!CROWS.length) CROWS.push({id:'',name:'',exp:'',qty:'',opened:'',promo:'',note:''});
+  // 照試算表（紙本）順序，同來源排在一起
+  var order=[]; D.kegs.forEach(function(k){if(order.indexOf(k.src)<0)order.push(k.src);});
+  CROWS=[];
+  order.forEach(function(s){D.kegs.forEach(function(k){ if(k.src!==s)return;
+    var r={}; CFIELDS.forEach(function(f){r[f]=k[f]==null?'':k[f];}); r._c=kOut(k)&&!isDate(k.exp)&&!isDate(k.exp2); CROWS.push(r); });});
+  if(!CROWS.length) CROWS.push(blankCheckRow());
   $('#kegNormal').hidden=true; $('#kegCheck').hidden=false; $('#kegBanner').hidden=true;
   $('#checkTitle').textContent='本週盤點（'+todayStr()+'）';
   $('#tabs').hidden=true; $('#checkBar').hidden=false; $('#fab').hidden=true;
   renderCheck(); window.scrollTo(0,0);
 }
 function endCheck(){CHECK=false;$('#kegNormal').hidden=false;$('#kegCheck').hidden=true;$('#kegBanner').hidden=false;$('#tabs').hidden=false;$('#checkBar').hidden=true;setTab('keg');renderKegs();}
+function stepNum(v,step,max){var n=parseFloat(v);if(isNaN(n))n=0;n=Math.round((n+step)*10)/10;if(n<0)n=0;if(max!=null&&n>max)n=max;return String(n);}
+function cStep(label,f,v,step){
+  return '<div class="f"><label>'+label+'</label><div class="stepper"><button type="button" data-cstep="'+f+':'+(-step)+'" aria-label="減少">−</button><input data-f="'+f+'" inputmode="'+(step<1?'decimal':'numeric')+'" value="'+esc(v)+'"><button type="button" data-cstep="'+f+':'+step+'" aria-label="增加">＋</button></div></div>';
+}
+function checkCount(){return CROWS.filter(function(r){return String(r.name).trim();}).length;}
 function renderCheck(){
+  var prev=null;
   $('#checkList').innerHTML=CROWS.map(function(r,i){
-    return '<div class="checkrow" data-i="'+i+'">'+
+    var head='';
+    if(r.id&&r.src!==prev){head='<h2 class="sec" style="margin:'+(prev===null?'4px':'18px')+' 2px 0">'+esc(r.src||'未分來源')+'</h2>';prev=r.src;}
+    if(r._c) return head+'<div class="checkrow compact" data-i="'+i+'"><div class="nm">🛢 '+esc(r.name)+'<span class="chip c-out">無庫存</span><button type="button" class="mini ml-auto" data-cexpand="1">有貨了</button></div></div>';
+    var tn=r.src!=='國內自購';
+    return head+'<div class="checkrow" data-i="'+i+'">'+
       '<div class="nm">'+(r.id?'🛢 '+esc(r.name):'<input data-f="name" placeholder="新的一桶：品名" value="'+esc(r.name)+'">')+'</div>'+
+      (r.id?'':'<div class="seg">'+['璞麗','國內自購'].map(function(s){return '<button type="button" data-csrc="'+s+'"'+(r.src===s?' class="on"':'')+'>'+s+'</button>';}).join('')+'</div>')+
       '<div class="grid2">'+
         '<div class="f"><label>效期</label><input type="date" data-f="exp" value="'+esc(r.exp)+'"></div>'+
-        '<div class="f"><label>剩餘桶數</label><div class="stepper"><button type="button" data-cstep="-1" aria-label="減一">−</button><input data-f="qty" inputmode="numeric" value="'+esc(r.qty)+'"><button type="button" data-cstep="1" aria-label="加一">＋</button></div></div>'+
-        '<div class="f"><label>開桶日</label><input type="date" data-f="opened" value="'+esc(r.opened)+'"><div class="quick"><button type="button" data-copen="1">今天開桶</button></div></div>'+
+        '<div class="f"><label>另一批效期</label><input type="date" data-f="exp2" value="'+esc(r.exp2)+'"></div>'+
+        cStep('開桶剩餘（0～1）','left',r.left,0.1)+
+        cStep(tn?'店內庫存':'庫存','s1',r.s1,1)+
+        (tn?cStep('台南庫存','s2',r.s2,1):'')+
         '<div class="f"><label>目前活動</label><input data-f="promo" placeholder="例：買3送1" value="'+esc(r.promo)+'"><div class="quick"><button type="button" data-cpromo="買2送1">買2送1</button><button type="button" data-cpromo="買3送1">買3送1</button><button type="button" class="clr" data-cpromo="">清除</button></div></div>'+
       '</div></div>';
   }).join('');
-  $('#checkSend').textContent='送出盤點（'+CROWS.filter(function(r){return String(r.name).trim();}).length+' 桶）';
+  $('#checkSend').textContent='送出盤點（'+checkCount()+' 項）';
 }
-$('#checkList').addEventListener('input',function(e){var el=e.target,row=el.closest('[data-i]');if(!row||!el.dataset.f)return;CROWS[+row.dataset.i][el.dataset.f]=el.value;if(el.dataset.f==='name')$('#checkSend').textContent='送出盤點（'+CROWS.filter(function(r){return String(r.name).trim();}).length+' 桶）';});
+$('#checkList').addEventListener('input',function(e){var el=e.target,row=el.closest('[data-i]');if(!row||!el.dataset.f)return;CROWS[+row.dataset.i][el.dataset.f]=el.value;if(el.dataset.f==='name')$('#checkSend').textContent='送出盤點（'+checkCount()+' 項）';});
 $('#checkList').addEventListener('click',function(e){
   var row=e.target.closest('[data-i]'); if(!row)return; var r=CROWS[+row.dataset.i], b;
-  if((b=e.target.closest('[data-cstep]'))){var v=Math.max(0,(parseInt(r.qty,10)||0)+(+b.dataset.cstep));r.qty=String(v);row.querySelector('[data-f="qty"]').value=v;}
-  else if(e.target.closest('[data-copen]')){r.opened=todayStr();row.querySelector('[data-f="opened"]').value=r.opened;}
+  if((b=e.target.closest('[data-cstep]'))){var p=b.dataset.cstep.split(':');r[p[0]]=stepNum(r[p[0]],+p[1],p[0]==='left'?1:null);row.querySelector('[data-f="'+p[0]+'"]').value=r[p[0]];}
+  else if(e.target.closest('[data-cexpand]')){r._c=false;renderCheck();var el=$('#checkList [data-i="'+row.dataset.i+'"] input');if(el)el.focus();}
+  else if((b=e.target.closest('[data-csrc]'))){r.src=b.dataset.csrc;renderCheck();}
   else if((b=e.target.closest('[data-cpromo]'))!=null&&b){r.promo=b.dataset.cpromo;row.querySelector('[data-f="promo"]').value=r.promo;}
 });
-$('#checkAdd').addEventListener('click',function(){CROWS.push({id:'',name:'',exp:'',qty:'',opened:'',promo:'',note:''});renderCheck();var last=$$('#checkList .checkrow');last[last.length-1].scrollIntoView({behavior:'smooth',block:'center'});});
+$('#checkAdd').addEventListener('click',function(){CROWS.push(blankCheckRow());renderCheck();var last=$$('#checkList .checkrow');last[last.length-1].scrollIntoView({behavior:'smooth',block:'center'});});
 $('#checkCancel').addEventListener('click',endCheck);
 $('#checkSend').addEventListener('click',function(){
-  var items=CROWS.filter(function(r){return String(r.name).trim();});
+  var items=CROWS.filter(function(r){return String(r.name).trim();}).map(function(r){var o={};CFIELDS.forEach(function(f){o[f]=r[f]==null?'':String(r[f]).trim();});if(D.schema===1)o.qty=o.s1;return o;});
   if(!items.length){toast('沒有要送出的桶裝');return;}
   var btn=this; btn.disabled=true; btn.textContent='送出中…'; setSync('busy','儲存中…');
   apiPost('kegCheck',{items:items}).then(function(){toast('盤點已送出 ✓');endCheck();})
@@ -572,23 +662,37 @@ $('#bDel').addEventListener('click',function(){var btn=this;armDelete(btn,functi
 
 /* ---------- 編輯：桶裝 ---------- */
 var EK=null;
+function kSyncSrc(){var tn=segGet('#kSrc')!=='國內自購';$('#kS1L').textContent=tn?'店內庫存（整桶）':'庫存（整桶）';$('#kS2F').hidden=!tn;}
+function kPreview(){
+  var e=kExpEff({exp:$('#kExp').value,exp2:$('#kExp2').value});
+  if(!e){$('#kPreview').innerHTML='還沒填效期，無法排促銷時間。';return;}
+  var i=bInfo({exp:e});
+  $('#kPreview').innerHTML=(isDate($('#kExp').value)&&isDate($('#kExp2').value)?'用早的那批 <b class="num">'+e+'</b> 計算・':'')+'促銷開始日：<b class="num">'+i.ps+'</b>（'+(i.dP<=0?'已開始':rel(i.dP))+'）・<span class="chip c-'+i.k+'">'+ST[i.k].t+'</span>';
+}
 function openKeg(id){
   var k=id?D.kegs.filter(function(x){return x.id===id;})[0]:null;
-  EK=k?Object.assign({},k):{id:'',name:'',exp:'',qty:'',opened:'',checked:'',promo:'',note:''};
+  EK=k?Object.assign({},k):{id:'',src:KF.src||'璞麗',name:'',exp:'',exp2:'',left:'',s1:'',s2:'',opened:'',checked:'',promo:'',note:''};
   $('#kTitle').textContent=k?'編輯桶裝':'新增桶裝';
-  $('#kName').value=EK.name; $('#kExp').value=isDate(EK.exp)?EK.exp:''; $('#kQty').value=EK.qty||''; $('#kOpened').value=isDate(EK.opened)?EK.opened:'';
+  $('#kName').value=EK.name; segSet('#kSrc',EK.src==='國內自購'?'國內自購':'璞麗');
+  $('#kExp').value=isDate(EK.exp)?EK.exp:''; $('#kExp2').value=isDate(EK.exp2)?EK.exp2:'';
+  $('#kLeft').value=EK.left||''; $('#kS1').value=EK.s1||''; $('#kS2').value=EK.s2||'';
+  $('#kOpened').value=isDate(EK.opened)?EK.opened:'';
   $('#kPromo').value=EK.promo||''; $('#kNote').value=EK.note||'';
   $('#kDel').hidden=!k; delete $('#kDel').dataset.armed; $('#kDel').textContent='刪除';
-  showErr($('#kErr'),''); openModal('#kModal');
+  showErr($('#kErr'),''); kSyncSrc(); kPreview(); openModal('#kModal');
 }
-$('#kForm').addEventListener('click',function(e){var b=e.target.closest('[data-step]');if(!b)return;var v=Math.max(0,(parseInt($('#kQty').value,10)||0)+(+b.dataset.step));$('#kQty').value=v;});
+$('#kForm').addEventListener('click',function(e){var b=e.target.closest('[data-kstep]');if(!b)return;var p=b.dataset.kstep.split(':'),el=$('#'+p[0]);el.value=stepNum(el.value,+p[1],p[0]==='kLeft'?1:null);});
+$('#kSrc').addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;segSet('#kSrc',b.dataset.v);kSyncSrc();});
+$('#kExp').addEventListener('input',kPreview); $('#kExp2').addEventListener('input',kPreview);
 $('#kOpenToday').addEventListener('click',function(){$('#kOpened').value=todayStr();});
 $('#kOpenClear').addEventListener('click',function(){$('#kOpened').value='';});
 $('#kCancel').addEventListener('click',function(){closeModal('#kModal');});
 $('#kForm').addEventListener('submit',function(e){
   e.preventDefault();
   var name=$('#kName').value.trim(); if(!name){showErr($('#kErr'),'請填品名');return;}
-  var rec=Object.assign({},EK,{name:name,exp:$('#kExp').value,qty:$('#kQty').value.trim(),opened:$('#kOpened').value,promo:$('#kPromo').value.trim(),note:$('#kNote').value.trim()});
+  var src=segGet('#kSrc');
+  var rec=Object.assign({},EK,{name:name,src:src,exp:$('#kExp').value,exp2:$('#kExp2').value,left:$('#kLeft').value.trim(),s1:$('#kS1').value.trim(),s2:src==='國內自購'?'':$('#kS2').value.trim(),opened:$('#kOpened').value,promo:$('#kPromo').value.trim(),note:$('#kNote').value.trim()});
+  if(D.schema===1) rec.qty=rec.s1; // 舊版後端相容
   var btn=$('#kSave'); btn.disabled=true; btn.textContent='儲存中…'; setSync('busy','儲存中…'); showErr($('#kErr'),'');
   apiPost('saveKeg',rec).then(function(){closeModal('#kModal');toast('已儲存 ✓');})
   .catch(function(){setSync('err','沒存到');showErr($('#kErr'),'沒有存到：網路不穩，請再按一次儲存。');})
@@ -630,7 +734,7 @@ if(!PIN){ showGate(''); }
 else{
   $('#app').hidden=false;
   var c=load(CACHE_KEY);
-  if(c){try{var o=JSON.parse(c);D.bottles=o.bottles||[];D.kegs=o.kegs||[];D.config=o.config||D.config;setSync('','上次資料');}catch(e){}}
+  if(c){try{var o=JSON.parse(c);D.bottles=o.bottles||[];D.kegs=normKegs(o.kegs);D.config=o.config||D.config;D.schema=o.schema||0;setSync('','上次資料');}catch(e){}}
   renderAll(); setTab('home'); refresh();
 }
 })();
