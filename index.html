@@ -184,6 +184,31 @@ h2.sec{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.08em;ma
 #pText{width:100%;min-height:240px;font-size:15px;line-height:1.55;border:1px solid var(--line);background:var(--surface2);border-radius:10px;padding:10px 11px;resize:vertical}
 #pPrev{border:1px dashed var(--line);border-radius:14px;padding:0 12px 12px;margin-bottom:6px}
 #pPrev h2.sec:first-child{margin-top:12px}
+.pcard li.plink{cursor:pointer}
+.pcard li .pgo{font-size:12px;color:var(--amber);font-weight:800;white-space:nowrap}
+
+/* 酒款介紹 */
+.bsum{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.6}
+.bcard{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden}
+.bcard.todo{box-shadow:none;background:transparent}
+.bcard .bh{display:block;width:100%;text-align:left;border:0;background:none;padding:12px 14px;cursor:pointer;color:inherit;font:inherit}
+.bcard .bn{font-weight:800;font-size:16px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.bcard .bn::after{content:'›';margin-left:auto;color:var(--muted);font-size:18px;transition:transform .15s}
+.bcard.open .bn::after{transform:rotate(90deg)}
+.bcard .be{font-size:13px;color:var(--muted);font-weight:700;margin-top:1px}
+.bcard .bs{font-size:13px;margin-top:3px}
+.bcard .btg{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.bcard .btg span{font-size:11.5px;font-weight:800;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 8px}
+.bcard .bd{padding:0 14px 14px;font-size:14px;line-height:1.65;border-top:1px dashed var(--line)}
+.bcard .bd dl{display:grid;grid-template-columns:auto 1fr;gap:4px 10px;margin:10px 0 0}
+.bcard .bd dt{font-weight:800;color:var(--muted);font-size:12.5px;padding-top:2px}
+.bcard .bd dd{margin:0}
+.bcard .bp{margin-top:10px;background:var(--amber-soft);border-radius:10px;padding:9px 11px;font-weight:700}
+.bcard .bw,.bcard .bi,.bcard .bx,.bcard .bsrc{margin-top:8px;font-size:13px}
+.bcard .bx{color:var(--muted)}
+.bcard .bsrc{color:var(--muted);font-size:12px}
+.bcard .bsrc a{color:inherit}
+.bcard.flash{outline:2px solid var(--amber);outline-offset:2px}
 
 /* pin gate */
 .gate{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
@@ -258,6 +283,19 @@ h2.sec{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.08em;ma
       <details class="panel pgap" id="pGap" hidden style="margin-top:24px"><summary id="pGapS"></summary><div id="pGapL"></div></details>
     </section>
 
+    <!-- 酒款介紹 -->
+    <section data-tab="beer" hidden>
+      <div class="panel">
+        <div style="font-weight:800;font-size:17px">酒款介紹</div>
+        <div class="bsum" id="gSum"></div>
+      </div>
+      <input class="search" id="gq" type="search" placeholder="搜尋品名、原文、風味（例：櫻桃、IPA）" aria-label="搜尋酒款" style="margin-top:12px">
+      <div class="chips" id="gfTag"></div>
+      <div class="chips" id="gfSt"></div>
+      <div class="count" id="gCount"></div>
+      <div id="gList"></div>
+    </section>
+
     <!-- 瓶裝 -->
     <section data-tab="bottle" hidden>
       <input class="search" id="q" type="search" placeholder="搜尋品名" aria-label="搜尋品名">
@@ -296,6 +334,7 @@ h2.sec{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.08em;ma
   <nav class="tabs" id="tabs">
     <button data-t="home" class="on"><span class="ic">◉</span>總覽</button>
     <button data-t="promo"><span class="ic">📣</span>活動</button>
+    <button data-t="beer"><span class="ic">🍺</span>酒款</button>
     <button data-t="bottle"><span class="ic">🍾</span>瓶裝</button>
     <button data-t="keg"><span class="ic">🛢</span>桶裝</button>
   </nav>
@@ -380,7 +419,7 @@ h2.sec{font-size:13px;font-weight:800;color:var(--muted);letter-spacing:.08em;ma
 <script>
 (function(){
 'use strict';
-var APP_VERSION='2026-11-06-01';
+var APP_VERSION='2026-11-08-01';
 var API='https://script.google.com/macros/s/AKfycbwC80CLvfnPaI5JLmgIRXcze9PxjTfqIW0oWlqIr_416YDZrpkEHluX9vrZvUH4GKNs/exec';            // ← 部署 Apps Script 後填入 /exec 網址
 var PIN_KEY='stockPin', CACHE_KEY='stockCache';
 
@@ -488,7 +527,7 @@ function setTab(t){
   TAB=t;
   $$('#tabs button').forEach(function(b){b.classList.toggle('on',b.getAttribute('data-t')===t);});
   $$('[data-tab]').forEach(function(s){s.hidden=s.getAttribute('data-tab')!==t;});
-  $('#fab').hidden = (t==='home') || (t==='promo') || CHECK;
+  $('#fab').hidden = (t==='home') || (t==='promo') || (t==='beer') || CHECK;
   $('#fab').textContent = t==='keg'?'＋ 新增桶裝':'＋ 新增瓶裝';
   window.scrollTo(0,0);
 }
@@ -778,6 +817,323 @@ document.addEventListener('click',function(e){
 $('#fab').addEventListener('click',function(){if(TAB==='keg')openKeg(null);else openBottle(null);});
 
 
+// 酒款介紹資料（2026-11 整理）
+// st: ok＝已對到原廠資料；part＝品牌已確認、款式或細節待確認；todo＝原文待確認（先用名稱推測風格）
+// tg: light 清爽 / fruit 果香 / sweet 偏甜 / sour 酸 / hoppy 苦韻 / rich 濃郁 / dark 深色 / wheat 小麥白 / abbey 修道院 / strong 高酒精 / low 低酒精 / cider 蘋果酒
+// src: vh 原廠 Van Honsebrouck / cor 原廠 Cornelissen / mal 原廠 Malheur / bb Beer Bee 啤酒瘋 / tf 頂級發酵 / bp Protz beer-pages / bs Belgian Shop / ic iCheers / bm BeerMenus / wk 維基百科 / gen 通用公開資料
+var BEERS=[
+/* ===== 卡斯特・巴哈・聖路易士（比利時 Van Honsebrouck 酒廠） ===== */
+{g:'卡斯特・巴哈・聖路易士',n:'卡斯特黑啤酒',e:'Kasteel Donker',b:'Van Honsebrouck・比利時',s:'四倍 Quadrupel',a:'11%',t:'12°C',
+ f:'焦糖、太妃糖，帶丁香般的香料感；烘烤麥芽',m:'酒體飽滿偏甜、酒精感明顯；收尾微苦帶香料，甜感回韻',
+ p:'比利時最暢銷的四倍啤酒，焦糖太妃糖香很濃，像在喝甜點，11% 要慢慢喝。',w:'喜歡濃郁偏甜、酒量好的客人',tg:'dark rich sweet strong',st:'ok',src:'vh'},
+{g:'卡斯特・巴哈・聖路易士',n:'卡斯特紅啤酒',e:'Kasteel Rouge',b:'Van Honsebrouck・比利時',s:'強烈水果啤酒（卡斯特黑＋櫻桃）',a:'8%',t:'6°C',
+ f:'櫻桃、比利時錐形軟糖般的甜香，底層有焦糖、太妃糖',m:'絲滑柔順，櫻桃甜中帶一點酸，收尾乾爽不膩',
+ p:'用卡斯特黑加櫻桃釀的，紅寶石色、櫻桃加焦糖的甜點感，不苦。',w:'怕苦、喜歡甜的客人',tg:'fruit sweet rich',st:'ok',src:'vh'},
+{g:'卡斯特・巴哈・聖路易士',n:'卡斯特三料啤酒',e:'Kasteel Tripel',b:'Van Honsebrouck・比利時',s:'三倍 Tripel',a:'11%',t:'9°C',
+ f:'蜂蜜色；香蕉、丁香，帶微香料果香與麥芽',m:'酒精帶來溫暖感，輕微苦韻平衡果香，收尾有香料、酒精感在最後',
+ p:'酒廠自稱全世界最強勁的三倍啤酒，金黃色、香蕉丁香香，喝起來暖暖的。',w:'喜歡金色烈啤、想挑戰高酒精的客人',tg:'strong rich',st:'ok',src:'vh'},
+{g:'卡斯特・巴哈・聖路易士',n:'卡斯特佳釀啤酒',e:'Kasteel Cuvée du Château',b:'Van Honsebrouck・比利時',s:'四倍 Quadrupel',a:'11%',t:'12°C',
+ f:'焦糖、香料、葡萄乾、無花果、蜜餞；烘烤麥芽帶咖啡與巧克力，有波特酒、馬德拉酒般的果香',m:'濃厚；收尾有細緻的啤酒花苦味、果香和茴香',
+ p:'重現「放了十年的卡斯特黑」的風味，果乾、咖啡巧克力和波特酒感，適合慢慢品。',w:'喜歡紅酒、波特酒或濃郁黑啤的客人',tg:'dark rich strong',st:'ok',src:'vh'},
+{g:'卡斯特・巴哈・聖路易士',n:'卡斯特覆盆子啤酒',e:'Kasteel Rubus Framboise',b:'Van Honsebrouck・比利時',s:'強烈水果啤酒',a:'7%',
+ f:'新鮮成熟的覆盆子香，淡淡麥芽；深紅色、粉紅泡沫',m:'酒體飽滿，果甜被輕微苦味平衡，收尾乾爽帶果香、讓人想一直喝',
+ p:'用真的覆盆子釀的，聞起來像夏天，莓果味很鮮，不會甜膩。',w:'喜歡莓果、甜度適中的客人',tg:'fruit sweet',st:'part',x:'生啤名稱對應為原廠的覆盆子款，請對照桶上標籤',src:'vh'},
+{g:'卡斯特・巴哈・聖路易士',n:'卡斯特三料白蘭地橡木桶啤酒',e:'Trignac XII',b:'Van Honsebrouck・比利時',s:'干邑桶陳三倍啤酒',a:'12%',t:'12°C',
+ f:'卡斯特三料放進干邑酒桶熟成至少 6 週；干邑、香蕉、香草',m:'豐厚圓潤，干邑的溫暖和香草融在一起，收尾溫和的苦韻停留很久',
+ p:'把三倍啤酒放進干邑桶熟成，聞得到干邑和香草，像啤酒版的白蘭地。',w:'喝威士忌、白蘭地的客人',tg:'strong rich',st:'ok',src:'vh'},
+{g:'卡斯特・巴哈・聖路易士',n:'卡斯特四次發酵啤酒',e:'',b:'Van Honsebrouck・比利時',s:'四倍 Quad（依名稱推測）',a:'',
+ f:'',m:'',p:'',w:'',tg:'dark strong',st:'todo',x:'卡斯特的四倍系列有 Donker（已列為卡斯特黑）和 Barista（咖啡巧克力款，11%），請拍酒標確認是哪一款',src:''},
+{g:'卡斯特・巴哈・聖路易士',n:'卡斯特精釀啤酒',e:'',b:'Van Honsebrouck・比利時',s:'',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'生啤，請拍桶上標籤確認原文',src:''},
+{g:'卡斯特・巴哈・聖路易士',n:'巴哈覆盆子啤酒',e:'Bacchus Frambozenbier',b:'Van Honsebrouck・比利時',s:'法蘭德斯酸褐啤酒＋覆盆子',a:'5%',
+ f:'覆盆子果香；Bacchus 系列在橡木桶熟成至少 18 個月，微酸、帶葡萄酒般的風味',m:'酸甜、解渴',
+ p:'比利時傳統橡木桶陳的酸褐啤酒加覆盆子，酸酸甜甜很好入口。',w:'喜歡酸甜、不愛苦的客人',tg:'fruit sour sweet',st:'ok',src:'vh'},
+{g:'卡斯特・巴哈・聖路易士',n:'巴哈櫻桃啤酒',e:'Bacchus Kriekenbier',b:'Van Honsebrouck・比利時',s:'法蘭德斯酸褐啤酒＋櫻桃',a:'',
+ f:'櫻桃果香；橡木桶熟成至少 18 個月，微酸、帶葡萄酒般的風味',m:'酸甜、解渴',
+ p:'橡木桶陳的酸褐啤酒加櫻桃，酸甜平衡、有一點紅酒感。',w:'喜歡酸甜、櫻桃口味的客人',tg:'fruit sour',st:'ok',src:'vh'},
+{g:'卡斯特・巴哈・聖路易士',n:'巴哈紅寶石啤酒',e:'',b:'Van Honsebrouck・比利時',s:'',a:'',f:'',m:'',p:'',w:'',tg:'sour',st:'todo',x:'巴哈系列另一款是 Bacchus Flemish Old Brown（法蘭德斯老褐，4.5%，蜂蜜、香料、酸櫻桃），請拍酒標確認',src:''},
+{g:'卡斯特・巴哈・聖路易士',n:'聖路易士自然發酵香檳啤酒',e:'St-Louis Gueuze Fond Tradition',b:'Van Honsebrouck・比利時',s:'Gueuze（野生酵母自然發酵的混釀酸啤）',a:'5%',
+ f:'花香、草本、柑橘；霧金色',m:'清瘦、非常酸，銳利的檸檬酸感，尾韻長',
+ p:'野生酵母自然發酵的比利時傳統酸啤，氣泡像香檳，酸度很高很清爽。第一次喝的客人可以先試一口。',w:'喜歡酸、喝香檳或氣泡酒的客人',tg:'sour light',st:'part',x:'依 375ml 規格對應 Fond Tradition，請對照酒標',src:'bp'},
+{g:'卡斯特・巴哈・聖路易士',n:'聖路易士優質蜜桃自然發酵啤酒',e:'St-Louis Premium Pêche',b:'Van Honsebrouck・比利時',s:'自然發酵水果啤酒（Lambic）',a:'2.6%',
+ f:'桃子香，底層有自然發酵的微酸',m:'中等酒體、綿密，酸度適中',
+ p:'酒精只有 2.6%，桃子香、酸甜像果汁，不太會喝酒的客人也可以。',w:'低酒精、喜歡甜的客人',tg:'fruit sweet low',st:'ok',src:'bp'},
+{g:'卡斯特・巴哈・聖路易士',n:'聖路易士優質森林莓果自然發酵啤酒',e:'',b:'Van Honsebrouck・比利時',s:'自然發酵水果啤酒（依名稱推測）',a:'',f:'',m:'',p:'',w:'',tg:'fruit low',st:'todo',x:'原廠官網目前的 Premium 系列只有 Gueuze／櫻桃／覆盆子／蜜桃，請拍酒標確認',src:''},
+{g:'卡斯特・巴哈・聖路易士',n:'叛逆比利時艾爾',e:'',b:'',s:'',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'生啤。可能是同酒廠的 Brigand（9%），請拍桶上標籤確認',src:''},
+
+/* ===== 馬路爾 ===== */
+{g:'馬路爾 Malheur',n:'馬路爾 8度啤酒',e:'Malheur 8',b:'Malheur・比利時',s:'比利時金色烈性艾爾（瓶中二次發酵）',a:'8%',
+ f:'啤酒花香為主，帶麥芽和一點小麥；乾草、酒精感、苦度恰到好處',m:'氣泡非常活潑，清新、層次複雜',
+ p:'氣泡很活潑的比利時金啤，乾草和啤酒花香，苦度剛好。',w:'喜歡金色、有點苦韻、氣泡感的客人',tg:'hoppy strong',st:'ok',src:'mal'},
+{g:'馬路爾 Malheur',n:'馬路爾 10度啤酒',e:'Malheur 10',b:'Malheur・比利時',s:'比利時金色烈性艾爾（瓶中二次發酵）',a:'10%',
+ f:'玫瑰、水蜜桃香；入口柳橙、香茅、檸檬凝乳，微苦微酸、橙皮感',m:'豐厚、油潤帶蜂蜜感，中等偏飽滿',
+ p:'聞起來有玫瑰和水蜜桃，入口是柳橙檸檬，口感圓潤有蜂蜜感，10% 但很好入口。',w:'喜歡花香果香、能喝高酒精的客人',tg:'fruit rich strong',st:'ok',src:'mal'},
+{g:'馬路爾 Malheur',n:'馬路爾 12度啤酒',e:'Malheur 12',b:'Malheur・比利時',s:'比利時深色烈性艾爾（瓶中二次發酵）',a:'12%',
+ f:'啤酒花的花香；麥芽像新鮮麵包，苦咖啡、堅果、蜂蜜和蘭姆酒般的香氣',m:'飽滿圓潤、帶甜甜的酒精感；苦甜交織，尾韻長而溫暖',
+ p:'深褐色 12 度，有麵包、咖啡、堅果和蘭姆酒感，尾韻很長，適合飯後慢慢喝。',w:'喜歡濃郁黑啤、平常喝烈酒的客人',tg:'dark rich strong',st:'ok',src:'mal'},
+
+/* ===== 聖伯納・羅斯福 ===== */
+{g:'聖伯納・羅斯福',n:'聖伯納白啤酒',e:'St. Bernardus Wit',b:'St. Bernardus・比利時',s:'比利時白啤',a:'5.5%',
+ f:'柑橘、橙皮、芫荽籽',m:'輕盈清爽、微甜、氣泡細',
+ p:'修道院風格酒廠做的白啤，柑橘清香很好入口。',w:'新手、喜歡清爽的客人',tg:'wheat light',st:'ok',src:'gen'},
+{g:'聖伯納・羅斯福',n:'聖伯納三料啤酒',e:'St. Bernardus Tripel',b:'St. Bernardus・比利時',s:'修道院三倍 Tripel',a:'8%',
+ f:'金黃色；果香與香料香、啤酒花',m:'中等酒體、氣泡足，收尾乾爽微苦',
+ p:'金黃色的修道院三倍，果香和香料平衡，乾爽好入口。',w:'喜歡金色修道院啤酒的客人',tg:'abbey strong',st:'ok',src:'gen'},
+{g:'聖伯納・羅斯福',n:'聖伯納上帝啤酒',e:'',b:'St. Bernardus・比利時',s:'',a:'',f:'',m:'',p:'',w:'',tg:'abbey dark strong',st:'todo',x:'可能是 Abt 12（四倍，10%），請拍酒標確認',src:''},
+{g:'聖伯納・羅斯福',n:'聖伯納優選啤酒',e:'',b:'St. Bernardus・比利時',s:'',a:'',f:'',m:'',p:'',w:'',tg:'abbey',st:'todo',x:'可能是 Prior 8 或 Pater 6，請拍酒標確認',src:''},
+{g:'聖伯納・羅斯福',n:'聖伯納雙料啤酒',e:'',b:'St. Bernardus・比利時',s:'修道院雙倍 Dubbel（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'abbey dark',st:'todo',x:'請拍酒標確認是 Pater 6 還是 Prior 8',src:''},
+{g:'聖伯納・羅斯福',n:'羅斯福6號啤酒',e:'Rochefort 6',b:'Rochefort 修道院・比利時',s:'正統修道院 Trappist',a:'7.5%',
+ f:'紅褐色；焦糖、果乾，淡淡的香料與土壤感',m:'中等酒體、柔順，微甜、收尾偏乾',
+ p:'真正由修道院釀的 Trappist 啤酒，6 號是羅斯福最溫和的一款，焦糖果乾香。',w:'想認識修道院啤酒的客人',tg:'abbey dark',st:'ok',src:'gen'},
+
+/* ===== 康尼森（Cornelissen 酒廠，含荷肯、聖噶瑪） ===== */
+{g:'康尼森 Cornelissen',n:'康尼森小麥白啤酒',al:['康尼森小麥白啤酒(鋁罐)','康尼森小麥白啤酒（鋁罐','康尼森小麥白啤酒（玻璃'],e:'Limburgse Witte',b:'Cornelissen・比利時',s:'未過濾比利時白啤',a:'5%',t:'3-4°C',
+ f:'芫荽籽、柳橙',m:'霧濁、清爽，苦度低',
+ p:'比利時林堡省的傳統白啤，柳橙芫荽香、不苦，很適合當第一杯。',w:'新手、怕苦的客人',tg:'wheat light',st:'ok',src:'cor'},
+{g:'康尼森 Cornelissen',n:'康尼森萊姆白啤酒',e:'Limburgse Witte Lemon',b:'Cornelissen・比利時',s:'白啤＋檸檬',a:'2.3%',t:'3-4°C',
+ f:'清新柑橘香（原廠是檸檬 Lemon）',m:'輕盈、酸甜，苦度很低',
+ p:'酒精只有 2.3%，像檸檬氣泡飲，不太喝酒也 OK。',w:'低酒精、想喝清爽的客人',tg:'low fruit light wheat',st:'ok',src:'cor'},
+{g:'康尼森 Cornelissen',n:'康尼森覆盆子白啤酒',e:'Limburgse Witte Rosé',b:'Cornelissen・比利時',s:'白啤＋覆盆子',a:'3.5%',t:'3-4°C',
+ f:'覆盆子果香、甜',m:'輕盈，苦度很低',
+ p:'粉紅色的覆盆子白啤，甜甜的、酒精低。',w:'喜歡甜、低酒精的客人',tg:'low fruit sweet wheat',st:'ok',src:'cor'},
+{g:'康尼森 Cornelissen',n:'康尼森蘋果水梨白啤酒',e:'Limburgse Witte Pear & Apple',b:'Cornelissen・比利時',s:'白啤＋蘋果、梨',a:'4.2%',t:'3-4°C',
+ f:'蘋果、梨子果香；原廠說是他們比較甜的一款',m:'氣泡活潑，苦度低',
+ p:'蘋果加水梨，是康尼森系列裡比較甜的一款。',w:'喜歡甜、果香的客人',tg:'fruit sweet wheat',st:'ok',src:'cor'},
+{g:'康尼森 Cornelissen',n:'康尼森蜜桃芒果白啤酒',e:'Limburgse Witte Peach Mango',b:'Cornelissen・比利時',s:'白啤＋桃子、芒果',a:'4.2%',
+ f:'滿滿的熱帶水果香，清新的桃子味',m:'稻黃色酒體，果香與清爽感平衡',
+ p:'熱帶水果香很明顯，桃子芒果味，清爽不膩。',w:'喜歡熱帶水果、甜度適中的客人',tg:'fruit sweet wheat light',st:'ok',src:'tf'},
+{g:'康尼森 Cornelissen',n:'康尼森草莓白啤酒',e:'Limburgse Witte Strawberry',b:'Cornelissen・比利時',s:'白啤＋草莓',a:'4.2%',
+ f:'草莓果香',m:'輕盈',p:'草莓口味的白啤，果香甜、好入口。',w:'喜歡草莓、甜的客人',tg:'fruit sweet wheat',st:'part',x:'只查到酒精度，風味依口味名稱描述',src:'tf'},
+{g:'康尼森 Cornelissen',n:'康尼森櫻桃拉格啤酒',e:'Kriekenbier Lager',b:'Cornelissen・比利時',s:'未過濾拉格＋酸櫻桃',a:'4.5%',t:'3-4°C',
+ f:'只用酸櫻桃（morello），酸甜的櫻桃味',m:'非常清爽、果味足，拉格溫和的苦度',
+ p:'拉格加酸櫻桃，酸甜清爽很解渴。',w:'喜歡清爽又想要一點果味的客人',tg:'fruit light',st:'ok',src:'cor'},
+{g:'康尼森 Cornelissen',n:'康尼森櫻桃白小麥啤酒',e:'Kriekenbier Wheat',b:'Cornelissen・比利時',s:'小麥啤酒＋櫻桃',a:'4%',
+ f:'櫻桃果香',m:'輕盈',p:'小麥啤酒加櫻桃，果香明顯、酒精不高。',w:'喜歡果香的客人',tg:'fruit wheat',st:'part',x:'只查到酒精度，風味依口味名稱描述',src:'tf'},
+{g:'康尼森 Cornelissen',n:'康尼森IPA',al:['康尼森 IPA'],e:'',b:'Cornelissen・比利時',s:'IPA',a:'',f:'',m:'',p:'',w:'',tg:'hoppy',st:'todo',x:'原廠目前的 IPA 是 King Mule（5.7%，加了橘子、苦度高），請拍酒標確認是否就是這款',src:''},
+{g:'康尼森 Cornelissen',n:'康尼森季節IPA啤酒',e:'',b:'Cornelissen・比利時',s:'IPA',a:'',f:'',m:'',p:'',w:'',tg:'hoppy',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'康尼森 Cornelissen',n:'康尼森紅色艾爾啤酒',e:'',b:'Cornelissen・比利時',s:'紅色艾爾（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'生啤，請拍桶上標籤確認',src:''},
+{g:'康尼森 Cornelissen',n:'康尼森冬季艾爾啤酒',e:'',b:'Cornelissen・比利時',s:'冬季艾爾（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'生啤，請拍桶上標籤確認',src:''},
+{g:'康尼森 Cornelissen',n:'荷肯諾克雙料啤酒',e:'Herkenrode Noctis',b:'Cornelissen・比利時',s:'修道院雙料（棕色）',a:'7%',t:'5-6°C',
+ f:'深色麥芽；使用英國香型啤酒花',m:'苦度中等（30 IBU）',
+ p:'赫肯羅德修道院啤酒的雙料款，2016 年世界啤酒大賞選為比利時最佳深色啤酒。',w:'喜歡深色、不想太烈的客人',tg:'abbey dark',st:'ok',src:'cor'},
+{g:'康尼森 Cornelissen',n:'荷肯威世三料啤酒',e:'Herkenrode Vesper',b:'Cornelissen・比利時',s:'修道院三料（瓶中二次發酵）',a:'9%',t:'5-6°C',
+ f:'深金色，獨特香氣，英國啤酒花',m:'酒體飽滿',
+ p:'深金色的修道院三倍，酒體飽滿，原廠說最適合晚上喝。',w:'喜歡金色烈啤的客人',tg:'abbey strong',st:'ok',src:'cor'},
+{g:'康尼森 Cornelissen',n:'荷肯西世黃金啤酒',e:'Herkenrode Cister',b:'Cornelissen・比利時',s:'修道院金色艾爾',a:'6.5%',t:'5-6°C',
+ f:'花香、果香，只帶一點點啤酒花',m:'順口，苦度中等（30 IBU）',
+ p:'花香果香的修道院金啤，6.5% 很好入口。',w:'想喝修道院啤酒但不要太烈的客人',tg:'abbey light',st:'ok',src:'cor'},
+{g:'康尼森 Cornelissen',n:'聖噶瑪雙料啤酒',e:'Sint-Gummarus Dubbel',b:'Cornelissen・比利時',s:'雙料 Dubbel（瓶中二次發酵）',a:'7.1%',t:'5-6°C',
+ f:'濃郁芳香，烘烤麥芽、香料香',m:'焦糖麥芽帶來甜潤的收尾，餘韻有香料感',
+ p:'烘烤麥芽和香料香，尾韻帶焦糖甜，經典比利時雙料。',w:'喜歡深色、麥芽香的客人',tg:'abbey dark',st:'ok',src:'cor'},
+{g:'康尼森 Cornelissen',n:'聖噶瑪三料啤酒',e:'Sint-Gummarus Tripel',b:'Cornelissen・比利時',s:'三料 Tripel',a:'8.3%',t:'5-6°C',
+ f:'銅金色；果香與香草植物香',m:'純麥扎實，收尾是柔和的啤酒花',
+ p:'林堡省第一款真正的三料，果香加草本香，尾韻柔和。',w:'喜歡金色烈啤的客人',tg:'abbey strong',st:'ok',src:'cor'},
+
+/* ===== 賓客（Brouwerij Kerkom） ===== */
+{g:'賓客 Bink',n:'賓客金黃啤酒',e:'Bink Blond',b:'Kerkom・比利時',s:'比利時艾爾',a:'5.5%',
+ f:'啤酒花香明顯',m:'清爽，收尾有解渴的苦味',
+ p:'比利時小酒廠的金色艾爾，有啤酒花苦香、很清爽。',w:'喜歡清爽、能接受一點苦的客人',tg:'hoppy light',st:'ok',src:'bs'},
+{g:'賓客 Bink',n:'賓客花季啤酒',e:'Bink Bloesem',b:'Kerkom・比利時',s:'比利時艾爾（加蜂蜜、梨子糖漿）',a:'7.1%',
+ f:'果香、微甜，蜂蜜和梨子',m:'收尾有持續的苦韻',
+ p:'Bloesem 是「花開」的意思，加了蜂蜜和梨子糖漿，甜中帶苦。',w:'喜歡蜂蜜、果香的客人',tg:'fruit sweet',st:'ok',src:'bs'},
+{g:'賓客 Bink',n:'賓客雙料啤酒',e:'',b:'Kerkom・比利時',s:'雙料（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'dark',st:'todo',x:'同酒廠有 Bink Bruin（5.5%）和 Adelardus Dubbel（7%），請拍酒標確認',src:''},
+{g:'賓客 Bink',n:'賓客修士三料啤酒',e:'',b:'Kerkom・比利時',s:'三料（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'strong',st:'todo',x:'可能是 Adelardus Tripel（9%），請拍酒標確認',src:''},
+{g:'賓客 Bink',n:'賓客IPA啤酒',al:['賓克IPA','賓克 IPA'],e:'',b:'Kerkom・比利時',s:'IPA',a:'',f:'',m:'',p:'',w:'',tg:'hoppy',st:'todo',x:'請拍酒標確認原文（生啤「賓克 IPA」也請一起確認是不是同一款）',src:''},
+
+/* ===== 其他比利時（璞麗） ===== */
+{g:'其他比利時（待確認）',n:'德蘭窖藏自然發酵啤酒',e:'',b:'',s:'自然發酵酸啤（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'sour',st:'todo',x:'可能是 De Ranke 酒廠的 Cuvée De Ranke（7%，混合自然發酵啤酒），請拍酒標確認',src:''},
+{g:'其他比利時（待確認）',n:'德蘭頂級橡木桶窖藏啤酒',e:'',b:'',s:'橡木桶熟成（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'sour',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'其他比利時（待確認）',n:'德蘭比利時琥珀啤酒',e:'',b:'',s:'琥珀艾爾（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'生啤，請拍桶上標籤確認',src:''},
+{g:'其他比利時（待確認）',n:'古登堡修道院啤酒',e:'',b:'',s:'修道院啤酒',a:'',f:'',m:'',p:'',w:'',tg:'abbey',st:'todo',x:'生啤。可能是 De Ranke Guldenberg（8%，乾爽、啤酒花很足的修道院三料），請拍桶上標籤確認',src:''},
+{g:'其他比利時（待確認）',n:'傑克珍藏朗姆啤酒',e:'',b:'',s:'朗姆酒桶風味（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'strong',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'其他比利時（待確認）',n:'傑克珍藏威士忌啤酒',e:'',b:'',s:'威士忌桶風味（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'strong',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'其他比利時（待確認）',n:'鵝緻手工女主教啤酒',e:'',b:'',s:'',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'其他比利時（待確認）',n:'荒野黃金艾爾啤酒',e:'',b:'',s:'金色艾爾（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'其他比利時（待確認）',n:'荒野紅寶石艾爾啤酒',e:'',b:'',s:'',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'其他比利時（待確認）',n:'荒野木梨艾爾啤酒',e:'',b:'',s:'水果艾爾（依名稱，木梨＝榲桲）',a:'',f:'',m:'',p:'',w:'',tg:'fruit',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'其他比利時（待確認）',n:'西城修道院雙料啤酒',e:'',b:'',s:'修道院雙料（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'abbey dark',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'其他比利時（待確認）',n:'西城修道院三料啤酒',e:'',b:'',s:'修道院三料（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'abbey strong',st:'todo',x:'請拍酒標確認原文',src:''},
+
+/* ===== 皇家卡羅（Het Anker 酒廠） ===== */
+{g:'皇家卡羅 Gouden Carolus',n:'比利時皇家卡羅黑啤酒',e:'Gouden Carolus Classic',b:'Het Anker・比利時',s:'比利時深色艾爾',a:'8.5%',
+ f:'焦糖與芳香麥芽，非常均衡',m:'酒廠形容它兼具葡萄酒的溫暖和啤酒的新鮮感',
+ p:'Het Anker 酒廠的招牌深色啤酒，焦糖麥芽香，很均衡。',w:'喜歡深色、麥芽香的客人',tg:'dark rich strong',st:'ok',src:'bb'},
+{g:'皇家卡羅 Gouden Carolus',n:'比利時皇家卡羅四重酵母金黃啤酒',e:'Gouden Carolus Hopsinjoor',b:'Het Anker・比利時',s:'比利時 IPA',a:'8%',
+ f:'釀造時分好幾次加啤酒花，香氣很足',m:'口感溫和，回味略帶苦味',
+ p:'比利時風格的 IPA，啤酒花香很足但苦度溫和。',w:'喜歡啤酒花香的客人',tg:'hoppy strong',st:'ok',src:'bb'},
+{g:'皇家卡羅 Gouden Carolus',n:'比利時皇家卡羅金啤酒',e:'',b:'Het Anker・比利時',s:'',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'可能是 Gouden Carolus Tripel（9%，乾淨俐落、酒體濃郁仍解渴），請拍酒標確認',src:''},
+{g:'皇家卡羅 Gouden Carolus',n:'比利時皇家卡羅紅啤酒',e:'',b:'Het Anker・比利時',s:'',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'皇家卡羅 Gouden Carolus',n:'皇家卡羅精釀威士忌金啤酒',e:'',b:'Het Anker・比利時',s:'威士忌風味（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'strong',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'皇家卡羅 Gouden Carolus',n:'皇家卡羅精釀威士忌黑啤酒',e:'Gouden Carolus Whisky Infused',b:'Het Anker・比利時',s:'比利時烈性艾爾（威士忌風味）',a:'11.7%',
+ f:'香草、橡木、巧克力香',m:'',p:'深色烈啤加上威士忌風味，有香草、橡木和巧克力香。',w:'喝威士忌的客人',tg:'dark strong rich',st:'part',x:'依名稱對應，請對照酒標確認',src:'bb'},
+
+/* ===== 比利時精選（國內自購） ===== */
+{g:'比利時精選',n:'比利時樂福黑啤酒',e:'Lefort',b:'Omer Vander Ghinste・比利時',s:'深色烈性艾爾',a:'10%',
+ f:'深紅褐色；醇厚果味、甘甜，帶焦糖和巧克力；烘烤微焦的麥香',m:'口感豐富飽滿',
+ p:'深紅褐色、10% 的比利時黑啤，焦糖巧克力和果香，甜而濃。（注意：樂福是 Lefort，不是 Leffe）',w:'喜歡濃郁偏甜黑啤的客人',tg:'dark rich sweet strong',st:'ok',src:'bb'},
+{g:'比利時精選',n:'比利時樂福金黃啤酒',e:'Tripel Lefort',b:'Omer Vander Ghinste・比利時',s:'三料 Tripel',a:'',f:'',m:'',p:'',w:'',tg:'strong',st:'part',x:'已確認是 Tripel Lefort（不是 Leffe），風味資料待補',src:'bb'},
+{g:'比利時精選',n:'坎布爾修道院金黃啤酒',e:'La Cambre Blond',b:'比利時',s:'修道院金色艾爾',a:'',f:'',m:'',p:'',w:'',tg:'abbey',st:'part',x:'已確認原文，風味資料待補',src:'bb'},
+{g:'比利時精選',n:'坎布爾修道院IPA啤酒',e:'',b:'',s:'IPA',a:'',f:'',m:'',p:'',w:'',tg:'hoppy',st:'todo',x:'請拍酒標確認原文',src:''},
+{g:'比利時精選',n:'比利時捷可繽酸啤酒',e:'Cuvée des Jacobins Rouge',b:'比利時',s:'法蘭德斯紅色酸啤（橡木桶熟成）',a:'',
+ f:'酸櫻桃、類似巴薩米克醋的酸香、橡木',m:'酸度明顯，中等酒體',
+ p:'在橡木桶裡熟成的比利時紅色酸啤，像葡萄酒醋加櫻桃的酸香，酸啤愛好者必點。',w:'喜歡酸、喝紅酒的客人',tg:'sour',st:'part',x:'原文已確認；風味為通用資料',src:'bb'},
+{g:'比利時精選',n:'薔曼老褐金帶啤酒',al:['蕾曼老褐金帶啤酒'],e:'Liefmans Goudenband',b:'Liefmans・比利時',s:'法蘭德斯老褐（酸褐啤）',a:'8%',
+ f:'紅寶石般的深紅褐色，明顯的果香',m:'像紅酒一樣醇厚溫潤',
+ p:'比利時老褐酸啤代表，像紅酒一樣醇厚，帶果香和微酸。',w:'喝紅酒、喜歡微酸的客人',tg:'sour rich dark',st:'ok',src:'bb'},
+{g:'比利時精選',n:'比利時可魯斯水果啤酒',e:'Het Anker Boscoli',b:'Het Anker・比利時',s:'水果啤酒（草莓／青蘋果／櫻桃／水蜜桃／綜合水果）',a:'3.5%',
+ f:'微微甜香的果香',m:'像汽水一樣輕盈',
+ p:'經典比利時水果啤酒，酒精 3.5%，喝起來像水果汽水。',w:'不太喝酒、喜歡甜的客人',tg:'fruit sweet low',st:'ok',src:'bb'},
+{g:'比利時精選',n:'比利時麥斯櫻桃啤酒',e:'Kriek Max',b:'Omer Vander Ghinste・比利時',s:'櫻桃水果啤酒',a:'',f:'',m:'',p:'',w:'',tg:'fruit sweet',st:'part',x:'已確認原文，風味資料待補',src:'bb'},
+{g:'比利時精選',n:'比利時麥斯覆盆子啤酒',e:'Framboise Max',b:'Omer Vander Ghinste・比利時',s:'覆盆子水果啤酒',a:'4.5%',
+ f:'紅色水果、甜櫻桃、覆盆子；粉紅色',m:'果香、微酸、清爽',
+ p:'粉紅色的覆盆子啤酒，果香甜中帶一點酸，清爽。',w:'喜歡莓果、甜的客人',tg:'fruit sweet',st:'ok',src:'bb'},
+{g:'比利時精選',n:'麥斯 Rouge 櫻桃啤酒',e:'Max Rouge',b:'Omer Vander Ghinste・比利時',s:'水果啤酒（深色啤酒＋櫻桃）',a:'8%',
+ f:'果香、櫻桃、香草',m:'酸甜平衡，櫻桃味十足',
+ p:'深色啤酒加櫻桃，櫻桃和香草香、酸甜平衡，酒精 8% 喝起來不明顯。',w:'喜歡櫻桃、甜的客人',tg:'fruit sweet strong',st:'ok',src:'bb'},
+{g:'比利時精選',n:'比利時路威賽德蘋果酒',e:'Cidre Ruwet Apple',b:'Cidre Ruwet・比利時',s:'比利時蘋果酒',a:'4.5%',
+ f:'清新活潑，帶一點酸',m:'跟一般甜的蘋果酒不一樣，偏清爽',
+ p:'比利時的蘋果酒，不是很甜那種，清新帶點酸。',w:'不喝啤酒、想喝清爽的客人',tg:'cider light',st:'ok',src:'bb'},
+{g:'比利時精選',n:'比利時路威賽德藍果酒',e:'Cidre Ruwet Elderberry',b:'Cidre Ruwet・比利時',s:'接骨木莓蘋果酒',a:'',f:'',m:'',p:'',w:'',tg:'cider fruit',st:'part',x:'已確認原文（藍果＝接骨木莓），風味資料待補',src:'bb'},
+{g:'比利時精選',n:'比利時路威賽德氣泡酒',e:'Cidre Ruwet Brut',b:'Cidre Ruwet・比利時',s:'不甜型蘋果氣泡酒（Brut）',a:'',f:'',m:'',p:'',w:'',tg:'cider',st:'part',x:'已確認原文，風味資料待補',src:'bb'},
+
+/* ===== 德國・奧地利 ===== */
+{g:'德國・奧地利',n:'德國保拉納小麥黑啤酒',e:'Paulaner Hefe-Weissbier Dunkel',b:'Paulaner・德國',s:'德式深色小麥',a:'5.3%',
+ f:'香蕉、丁香，焦糖與麵包麥香',m:'綿密、圓潤，微甜',
+ p:'慕尼黑的深色小麥，香蕉丁香香加焦糖麥芽，順口不苦。',w:'喜歡小麥啤酒、想試深色但怕苦的客人',tg:'wheat dark',st:'ok',src:'gen'},
+{g:'德國・奧地利',n:'保拉納小麥白啤酒（生啤）',al:['保拉納 20L','保拉納'],e:'Paulaner Hefe-Weissbier',b:'Paulaner・德國',s:'德式小麥白',a:'5.5%',
+ f:'香蕉、丁香，小麥麵包香',m:'綿密、氣泡足',
+ p:'德國經典小麥啤酒，香蕉丁香香、泡沫綿密。',w:'新手、喜歡順口的客人',tg:'wheat light',st:'part',x:'生啤一般是這款，請對照桶上標籤',src:'gen'},
+{g:'德國・奧地利',n:'柏克金黃金拉格啤酒',e:'Buckskin Munich Helles',b:'Buckskin',s:'慕尼黑淡色拉格',a:'4.9%',t:'8-12°C',
+ f:'清爽麥香偏焦糖調，有啤酒花的草本香',m:'飽滿但清新，爽冽乾爽，適合大口喝',
+ p:'金黃清澈的慕尼黑拉格，麥香飽滿又爽口。',w:'平常喝拉格、想大口喝的客人',tg:'light',st:'ok',src:'ic'},
+{g:'德國・奧地利',n:'柏克金科隆啤酒',e:'Buckskin Kölsch',b:'Buckskin',s:'科隆啤酒 Kölsch',a:'',f:'',m:'',p:'',w:'',tg:'light',st:'part',x:'生啤。品牌已確認，款式與風味待確認',src:''},
+{g:'德國・奧地利',n:'柏克金德式小麥啤酒',e:'Buckskin Hefeweizen',b:'Buckskin',s:'德式小麥',a:'',f:'',m:'',p:'',w:'',tg:'wheat',st:'part',x:'生啤。品牌已確認，款式與風味待確認',src:''},
+{g:'德國・奧地利',n:'艾德懷斯白啤酒',al:['艾德懷斯 8L','艾德懷斯'],e:'Edelweiss',b:'Edelweiss・奧地利',s:'奧地利小麥白啤',a:'',f:'',m:'',p:'',w:'',tg:'wheat light',st:'part',x:'生啤 8L。品牌已確認，款式與風味待確認',src:''},
+
+/* ===== 大眾・日系・其他 ===== */
+{g:'大眾經典',n:'豪格登小麥啤酒',al:['豪格登小麥白啤酒'],e:'Hoegaarden Wit',b:'Hoegaarden・比利時',s:'比利時白啤',a:'4.9%',
+ f:'橙皮、芫荽籽，淡淡香料',m:'輕盈、綿密、清爽',
+ p:'最經典的比利時白啤，柑橘香、不苦。',w:'新手、怕苦的客人',tg:'wheat light',st:'ok',src:'gen'},
+{g:'大眾經典',n:'可倫堡1664白啤酒',e:'Kronenbourg 1664 Blanc',b:'Kronenbourg・法國',s:'白啤',a:'5%',
+ f:'柑橘、芫荽',m:'輕盈、微甜清爽',p:'法國的白啤，柑橘香、微甜好入口。',w:'新手、喜歡清爽的客人',tg:'wheat light',st:'ok',src:'gen'},
+{g:'大眾經典',n:'可倫堡1664桃紅白啤酒',e:'Kronenbourg 1664 Rosé',b:'Kronenbourg・法國',s:'果味白啤',a:'4.5%',
+ f:'紅色莓果香',m:'輕盈、偏甜',p:'粉紅色的白啤，莓果香、甜甜的。',w:'喜歡甜、果香的客人',tg:'fruit sweet light',st:'ok',src:'gen'},
+{g:'大眾經典',n:'朝日啤酒 ASAHI',e:'Asahi Super Dry',b:'Asahi・日本',s:'日式辛口拉格',a:'5%',
+ f:'淡淡麥香，乾淨',m:'清爽、乾（辛口），收尾俐落',p:'日本辛口啤酒，乾淨俐落、很解膩，配炸物燒烤剛好。',w:'喜歡清爽、要配餐的客人',tg:'light',st:'ok',src:'gen'},
+{g:'大眾經典',n:'海尼根啤酒',e:'Heineken',b:'Heineken・荷蘭',s:'拉格',a:'5%',
+ f:'淡麥香、微果香',m:'清爽、苦度低',p:'大家最熟悉的荷蘭拉格，清爽好喝。',w:'想喝熟悉口味的客人',tg:'light',st:'ok',src:'gen'},
+{g:'大眾經典',n:'金牌台灣啤酒',al:['金牌 10L','金牌'],e:'Taiwan Beer Gold Medal',b:'台灣菸酒・台灣',s:'拉格',a:'5%',
+ f:'淡麥香',m:'清爽、順口、苦度低',p:'台灣在地的金牌，清爽順口。',w:'想喝熟悉口味的客人',tg:'light',st:'ok',src:'gen'},
+{g:'大眾經典',n:'Stella 時代啤酒',al:['Stalla 時代啤酒','Stella 時代啤酒'],e:'Stella Artois',b:'Stella Artois・比利時',s:'比利時皮爾森',a:'5%',
+ f:'淡麥香，花草般的啤酒花香',m:'清爽、俐落',p:'比利時的皮爾森，清爽俐落。',w:'喜歡清爽拉格的客人',tg:'light',st:'ok',src:'gen'},
+{g:'大眾經典',n:'健力士啤酒',al:['健力士','傑力士'],e:'Guinness Draught',b:'Guinness・愛爾蘭',s:'愛爾蘭世濤（氮氣）',a:'4.2%',
+ f:'烘烤大麥、咖啡、黑巧克力',m:'氮氣帶來奶油般綿密的泡沫，酒體比看起來輕，收尾乾',
+ p:'看起來很濃，其實很順口，咖啡黑巧克力香，泡沫像奶蓋。',w:'想試黑啤但怕太重的客人',tg:'dark',st:'ok',src:'gen'},
+{g:'大眾經典',n:'Orion zero 零醣啤酒',e:'',b:'Orion・日本沖繩',s:'',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'請拍罐身確認原文',src:''},
+{g:'大眾經典',n:'Orion zero 生啤酒',e:'',b:'Orion・日本沖繩',s:'',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'請拍罐身確認原文',src:''},
+{g:'大眾經典',n:'Orion zero 黑啤酒',e:'',b:'Orion・日本沖繩',s:'',a:'',f:'',m:'',p:'',w:'',tg:'dark',st:'todo',x:'請拍罐身確認原文',src:''},
+
+/* ===== 雷柯德（瑞典水果酒） ===== */
+{g:'雷柯德 Rekorderlig',n:'雷柯德頂級水果酒-百香果',e:'Rekorderlig Passionfruit',b:'Rekorderlig・瑞典',s:'水果酒（cider）',a:'4%',
+ f:'百香果的熱帶果香',m:'甜、氣泡多',p:'瑞典水果酒，百香果味甜甜的，倒在加冰的杯子裡最好喝。',w:'不喝啤酒、喜歡甜的客人',tg:'cider fruit sweet',st:'ok',src:'gen'},
+{g:'雷柯德 Rekorderlig',n:'雷柯德頂級水果酒-野莓',e:'Rekorderlig Wild Berries',b:'Rekorderlig・瑞典',s:'水果酒（cider）',a:'4%',
+ f:'綜合莓果香',m:'甜、氣泡多',p:'瑞典水果酒，綜合莓果味，加冰喝。',w:'不喝啤酒、喜歡甜的客人',tg:'cider fruit sweet',st:'ok',src:'gen'},
+{g:'雷柯德 Rekorderlig',n:'雷柯德頂級水果酒-西洋梨',e:'Rekorderlig Pear',b:'Rekorderlig・瑞典',s:'梨子酒（cider）',a:'4.5%',
+ f:'清甜的梨子香',m:'甜、清爽',p:'瑞典梨子酒，清甜不膩，加冰喝。',w:'不喝啤酒、喜歡清甜的客人',tg:'cider fruit sweet',st:'ok',src:'gen'},
+{g:'雷柯德 Rekorderlig',n:'雷柯德頂級水果酒-草莓萊姆',e:'Rekorderlig Strawberry-Lime',b:'Rekorderlig・瑞典',s:'水果酒（cider）',a:'4%',
+ f:'草莓甜香加萊姆的清新酸',m:'甜、氣泡多',p:'草莓加萊姆，甜中帶一點酸，加冰喝很像水果氣泡飲。',w:'不喝啤酒、喜歡甜的客人',tg:'cider fruit sweet',st:'ok',src:'gen'},
+
+/* ===== 豪格（Haacht 酒廠） ===== */
+{g:'豪格 Haacht',n:'豪格 Super 8 精彩小麥啤酒',e:'Haacht Super 8 Blanche',b:'Haacht・比利時',s:'比利時白啤',a:'5.1%',f:'',m:'',p:'',w:'',tg:'wheat light',st:'part',x:'生啤。已確認原文與酒精度，風味資料待補',src:'bs'},
+{g:'豪格 Haacht',n:'豪格 Super 8 IPA 啤酒',e:'Haacht Super 8 IPA',b:'Haacht・比利時',s:'IPA',a:'',f:'',m:'',p:'',w:'',tg:'hoppy',st:'part',x:'生啤。已確認原文，風味資料待補',src:''},
+{g:'豪格 Haacht',n:'豪格紅寶石啤酒',e:'',b:'Haacht・比利時',s:'',a:'',f:'',m:'',p:'',w:'',tg:'',st:'todo',x:'生啤。紙本品名中間被遮住，請拍桶上標籤確認',src:''},
+
+/* ===== 生啤待確認 ===== */
+{g:'生啤待確認',n:'路比三料',e:'',b:'',s:'三料（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'strong',st:'todo',x:'生啤。請拍桶上標籤確認',src:''},
+{g:'生啤待確認',n:'大滿貫啤酒花啤酒',e:'',b:'',s:'',a:'',f:'',m:'',p:'',w:'',tg:'hoppy',st:'todo',x:'生啤。請拍桶上標籤確認',src:''},
+{g:'生啤待確認',n:'三劍客皇家世淘啤酒',e:'',b:'',s:'世濤 Stout（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'dark',st:'todo',x:'生啤 30L。請拍桶上標籤確認',src:''},
+{g:'生啤待確認',n:'三劍客杰克真愛 IPA啤酒',e:'',b:'',s:'IPA',a:'',f:'',m:'',p:'',w:'',tg:'hoppy',st:'todo',x:'生啤 30L。請拍桶上標籤確認',src:''},
+{g:'生啤待確認',n:'三劍客新英式IPA啤酒',e:'',b:'',s:'新英格蘭 IPA（依名稱）',a:'',f:'',m:'',p:'',w:'',tg:'hoppy fruit',st:'todo',x:'生啤 30L。請拍桶上標籤確認',src:''},
+{g:'生啤待確認',n:'三劍客IPA啤酒',e:'',b:'',s:'IPA',a:'',f:'',m:'',p:'',w:'',tg:'hoppy',st:'todo',x:'生啤 30L。請拍桶上標籤確認',src:''}
+];
+var BEER_SRC={vh:'Van Honsebrouck 原廠網站',cor:'Cornelissen 原廠網站',mal:'Malheur 原廠網站',bb:'Beer Bee 啤酒瘋',tf:'頂級發酵',bp:'Protz beer-pages',bs:'Belgian Shop',ic:'iCheers',bm:'BeerMenus',wk:'維基百科',gen:'通用公開資料'};
+
+/* ---------- 酒款介紹 ---------- */
+var BEER_SRC_URL={vh:'https://www.vanhonsebrouck.be/en/',cor:'https://brouwerijcornelissen.be/en/beers',mal:'https://malheur.be/en',bb:'https://beer-bee.com/',tf:'https://topfermenting.com.tw/',bp:'https://www.beer-pages.com/notes/brewery_id_vanh.html',bs:'https://store.belgianshop.com/15__bink',ic:'https://www.icheers.tw/iCheers/Beer/WineDetail/wine_detail/17038',bm:'https://beermenus.com/breweries/7056-brouwerij-de-ranke'};
+var BTAGS=[['','全部'],['light','清爽'],['fruit','果香'],['sweet','偏甜'],['sour','酸'],['hoppy','苦韻'],['rich','濃郁'],['dark','深色'],['wheat','小麥白'],['abbey','修道院'],['strong','高酒精'],['low','低酒精'],['cider','蘋果酒']];
+var BTAG_T={}; BTAGS.forEach(function(x){BTAG_T[x[0]]=x[1];});
+var BST={ok:'',part:'部分待確認',todo:'原文待確認'};
+var BF={q:'',tag:'',st:''}, BOPEN={};
+function beerKeys(b){return [b.n].concat(b.al||[]);}
+function beerFind(name){
+  var k=pNorm(name), hit=null; if(!k) return null;
+  BEERS.some(function(b,i){ if(beerKeys(b).some(function(x){return pNorm(x)===k;})){hit=i;return true;} return false; });
+  if(hit===null) BEERS.some(function(b,i){ if(beerKeys(b).some(function(x){var y=pNorm(x);return y&&(k.indexOf(y)>=0||y.indexOf(k)>=0);})){hit=i;return true;} return false; });
+  return hit;
+}
+function beerStock(){
+  var m={};
+  function add(i,txt){ if(i===null) return; (m[i]=m[i]||[]).push(txt); }
+  D.bottles.forEach(function(b){ var sz=(String(b.name).match(/(\d+(?:\.\d+)?\s*(?:ML|ml|L))/)||[])[1]||''; add(beerFind(b.name),'瓶裝 '+(sz||'')+(isDate(b.exp)?'（效期 '+b.exp+'）':'')); });
+  D.kegs.forEach(function(k){ var i=kInfo(k); add(beerFind(k.name),'生啤'+(i.k==='out'?'（目前無庫存）':(i.e?'（效期 '+i.e+'）':''))); });
+  return m;
+}
+function beerCard(b,i,stock){
+  var open=!!BOPEN[i], badge=BST[b.st]?'<span class="chip '+(b.st==='todo'?'c-out':'c-q')+'">'+BST[b.st]+'</span>':'';
+  var line=[b.s,b.a].filter(Boolean).join('・');
+  var tags=(b.tg||'').split(' ').filter(Boolean).map(function(t){return '<span>'+esc(BTAG_T[t]||t)+'</span>';}).join('');
+  var dl='';
+  if(b.f) dl+='<dt>風味</dt><dd>'+esc(b.f)+'</dd>';
+  if(b.m) dl+='<dt>口感</dt><dd>'+esc(b.m)+'</dd>';
+  if(b.b) dl+='<dt>酒廠</dt><dd>'+esc(b.b)+'</dd>';
+  if(b.t) dl+='<dt>建議溫度</dt><dd>'+esc(b.t)+'</dd>';
+  var st=stock[i]||[];
+  var body=(dl?'<dl>'+dl+'</dl>':'')+
+    (b.p?'<div class="bp">💬 '+esc(b.p)+'</div>':'')+
+    (b.w?'<div class="bw">👥 適合：'+esc(b.w)+'</div>':'')+
+    (b.x?'<div class="bx">⚠ '+esc(b.x)+'</div>':'')+
+    (st.length?'<div class="bi">🏷 店內：'+st.map(esc).join('、')+'</div>':'')+
+    (b.src&&BEER_SRC[b.src]?'<div class="bsrc">資料來源：'+(BEER_SRC_URL[b.src]?'<a href="'+BEER_SRC_URL[b.src]+'" target="_blank" rel="noopener">'+esc(BEER_SRC[b.src])+'</a>':esc(BEER_SRC[b.src]))+'</div>':'');
+  return '<div class="bcard'+(b.st==='todo'?' todo':'')+(open?' open':'')+'" id="beer-'+i+'">'+
+    '<button type="button" class="bh" data-beer="'+i+'" aria-expanded="'+open+'">'+
+      '<div class="bn">'+esc(b.n)+badge+'</div>'+
+      (b.e?'<div class="be">'+esc(b.e)+'</div>':'')+
+      (line?'<div class="bs">'+esc(line)+'</div>':'')+
+      (tags?'<div class="btg">'+tags+'</div>':'')+
+    '</button><div class="bd"'+(open?'':' hidden')+'>'+body+'</div></div>';
+}
+function renderBeers(){
+  var n={ok:0,part:0,todo:0}; BEERS.forEach(function(b){n[b.st]++;});
+  $('#gSum').innerHTML='共 '+BEERS.length+' 款・已確認 '+n.ok+'・部分待確認 '+n.part+'・原文待確認 '+n.todo+'<br>點一下展開風味、口感和推薦說法。標「待確認」的請對照酒標英文名再介紹。';
+  chipRow($('#gfTag'),'風味',BTAGS,BF.tag,'tag');
+  chipRow($('#gfSt'),'資料',[['','全部'],['ok','已確認'],['need','待確認']],BF.st,'st');
+  var q=BF.q.trim().toLowerCase(), stock=beerStock();
+  var rows=[]; BEERS.forEach(function(b,i){
+    if(BF.tag&&(' '+(b.tg||'')+' ').indexOf(' '+BF.tag+' ')<0) return;
+    if(BF.st==='ok'&&b.st!=='ok') return;
+    if(BF.st==='need'&&b.st==='ok') return;
+    if(q){ var hay=[b.n,b.e,b.s,b.f,b.m,b.p,b.b].concat(b.al||[]).join(' ').toLowerCase(); if(hay.indexOf(q)<0) return; }
+    rows.push(i);
+  });
+  $('#gCount').textContent='符合 '+rows.length+' 款';
+  var html='', g=null;
+  rows.forEach(function(i){ var b=BEERS[i]; if(b.g!==g){ if(g!==null) html+='</div>'; g=b.g; html+='<h2 class="sec">'+esc(g)+'</h2><div class="list">'; } html+=beerCard(b,i,stock); });
+  if(g!==null) html+='</div>';
+  $('#gList').innerHTML=html||'<div class="empty">沒有符合的酒款</div>';
+}
+$('#gq').addEventListener('input',function(){BF.q=this.value;renderBeers();});
+['#gfTag','#gfSt'].forEach(function(s){$(s).addEventListener('click',function(e){var b=e.target.closest('[data-k]');if(!b)return;BF[b.getAttribute('data-k')]=b.getAttribute('data-v');renderBeers();});});
+$('#gList').addEventListener('click',function(e){
+  var h=e.target.closest('[data-beer]'); if(!h) return;
+  var i=+h.getAttribute('data-beer'); BOPEN[i]=!BOPEN[i];
+  var card=$('#beer-'+i); card.classList.toggle('open',BOPEN[i]); h.setAttribute('aria-expanded',BOPEN[i]); card.querySelector('.bd').hidden=!BOPEN[i];
+});
+function gotoBeer(i){
+  BF={q:'',tag:'',st:''}; $('#gq').value=''; BOPEN[i]=true; setTab('beer'); renderBeers();
+  var card=$('#beer-'+i); if(!card) return;
+  card.scrollIntoView({block:'center'}); card.classList.add('flash'); setTimeout(function(){card.classList.remove('flash');},1600);
+}
+document.addEventListener('click',function(e){var a=e.target.closest('[data-goto-beer]');if(a)gotoBeer(+a.getAttribute('data-goto-beer'));});
+
 /* ---------- 活動看板 ---------- */
 // 解析 LINE 公告格式：🍻＝活動名稱（括號＝規則）、•＝品項、💡＝公告、「暫無」＝沒有品項、———＝分段
 var P_EMO=/^(?:🍻|🍺|🍷|🥂|🍹|🍸|🍶|🥃|🍾|🎉|🔥|⭐|★|☆|✨|📣|📢)+/;
@@ -849,7 +1205,7 @@ function promoHTML(P,live){
       if(e.t==='note') return '<div class="pnote'+(/結束|取消|停止|暫停/.test(e.text)?' off':'')+'">'+(/結束|取消|停止|暫停/.test(e.text)?'':'💡 ')+esc(e.text)+(e.sub?'<small>'+esc(e.sub)+'</small>':'')+'</div>';
       var has=e.items.length>0;
       return '<div class="pcard'+(has?'':' pnone')+'"><div class="ph"><span class="pt">'+esc(e.title)+'</span>'+(e.rule?'<span class="chip c-promo">'+esc(e.rule)+'</span>':'')+'</div>'+
-        (has?'<ul>'+e.items.map(function(it){return '<li><span>'+esc(it)+'</span>'+(live?pHint(it,e.cat):'')+'</li>';}).join('')+'</ul>':'<div class="pe">目前暫無指定品項</div>')+'</div>';
+        (has?'<ul>'+e.items.map(function(it){var bi=live?beerFind(it):null;return '<li'+(bi!==null?' class="plink" data-goto-beer="'+bi+'"':'')+'><span>'+esc(it)+'</span>'+(live?pHint(it,e.cat):'')+(bi!==null?'<span class="pgo">介紹 ›</span>':'')+'</li>';}).join('')+'</ul>':'<div class="pe">目前暫無指定品項</div>')+'</div>';
     }).join('')+'</div>';
   }).join('');
 }
@@ -925,7 +1281,7 @@ $('#pForm').addEventListener('submit',function(e){
 
 /* ---------- 其他 ---------- */
 var tt;function toast(m){var t=$('#toast');t.textContent=m;t.classList.add('on');clearTimeout(tt);tt=setTimeout(function(){t.classList.remove('on');},2000);}
-function renderAll(){renderHome();renderPromo();renderBottles();renderKegs();}
+function renderAll(){renderHome();renderPromo();renderBeers();renderBottles();renderKegs();}
 
 // 回到前景或每 3 分鐘自動更新資料（編輯中不打斷）
 document.addEventListener('visibilitychange',function(){if(!document.hidden&&PIN&&!modalOpen()&&!CHECK)refresh();});
